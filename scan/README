@@ -1,0 +1,1 @@
+pescanner scans a directory recursively and scrapes data on every PE32 file it finds.

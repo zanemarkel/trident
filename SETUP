@@ -1,0 +1,11 @@
+This file explains how to setup an environment to:
+1) Construct a PE32 file database
+2) (eventually) Learn from that data
+3) (eventually) Test that data
+
+--- Required packages ---
+python
+pefile (python module)
+python-magic (python module)
+
+--- 
