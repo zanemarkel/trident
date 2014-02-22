@@ -277,6 +277,8 @@ def main():
             print 'Examined %s' % (filename)
         except pefile.PEFormatError:
             print '%s is not a pefile' % (filename)           
+        except UnboundLocalError:
+            print 'Problems with %s' % (filename)
 
 
 if __name__ == '__main__':
