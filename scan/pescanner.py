@@ -13,6 +13,10 @@
 #               attributes for the sections attributes, because each example
 #               has a variable number of sections yet must have the same number
 #               of attributes.
+#
+#               Magic numbers in attribute data:
+#               BaseOfData not found -> -1
+#               Unknown (sub)language -> lang bools set to None
 ###############################################################
 # TODO: add all the attribute checks 
 ###############################################################
@@ -66,14 +70,24 @@ def lang_bools(pe):
                             resource_lang.data.lang, resource_lang.data.sublang)
 
                             # Here we check if we need to set any bools to true
-                            if(pefile.LANG[lang] == 0):
-                                ret[0] = True
-                            if(pefile.LANG[lang] > 127):
-                                ret[1] = True
-                            if(pefile.SUBLANG[sublang] == 0):
-                                ret[2] = True
-                            if(pefile.SUBLANG[sublang] == 2):
-                                ret[3] = True
+                            try:
+                                if(pefile.LANG[lang] == 0):
+                                    ret[0] = True
+                                if(pefile.LANG[lang] > 127):
+                                    ret[1] = True
+                            except KeyError:
+                                print 'KeyError!'
+                                ret[0] = None
+                                ret[1] = None
+                            try:
+                                if(pefile.SUBLANG[sublang] == 0):
+                                    ret[2] = True
+                                if(pefile.SUBLANG[sublang] == 2):
+                                    ret[3] = True
+                            except KeyError:
+                                print 'KeyError!'
+                                ret[2] = None
+                                ret[3] = None
     return ret                            
 
 
@@ -96,7 +110,7 @@ def header_line():
     "NumLinenums!=0", "PointerToRawData==0", "PointerToRelocations!=0", \
     "PointerToLinenumbers!=0", "LowEntropy", "HighEntropy", "Language=0", \
     "Language>127", "SubLang=0", "SubLang=2", ".rsrc size", "sample size", \
-    "isMalware"\n'
+    "RaisedException", "isMalware"\n'
 
 def pe_analysis(pathname, ftype):
     """
@@ -109,6 +123,8 @@ def pe_analysis(pathname, ftype):
 
     # Organize the data into a list
     pe_list = []
+
+    raised_exception = False    
 
     # Name
     pe_list.append(pathname)
@@ -152,7 +168,11 @@ def pe_analysis(pathname, ftype):
     # OptionalHeader Location Attributes
     pe_list.append( pe.OPTIONAL_HEADER.AddressOfEntryPoint )
     pe_list.append( pe.OPTIONAL_HEADER.BaseOfCode )
-    pe_list.append( pe.OPTIONAL_HEADER.BaseOfData )
+    try:
+        pe_list.append( pe.OPTIONAL_HEADER.BaseOfData )
+    except AttributeError:
+        raised_exception = True
+        pe_list.append( -1 ) # BaseOfData not found
 
     # OptionalHeader Misc Attributes
     pe_list.append( pe.OPTIONAL_HEADER.Reserved1 )
@@ -211,11 +231,16 @@ def pe_analysis(pathname, ftype):
     # This checks the resource file languages for anything abnormal
     langs = lang_bools(pe)
     for this_bool in langs:
+        if(this_bool is None):
+            raised_exception = True
         pe_list.append(this_bool)
     
     # Resource size and the actual sample size (for comparison)
     pe_list.append(rsrc_size)
     pe_list.append(getsize(pathname))
+
+    # RaisedException indicates if anything in the scan caused an exception to be raised
+    pe_list.append(raised_exception)
 
     # isMalware
     pe_list.append(ftype)
@@ -275,10 +300,12 @@ def main():
             result = pe_analysis(filename, options.ftype) 
             outfile.write('%s\n' % (result))
             print 'Examined %s' % (filename)
-        except pefile.PEFormatError:
-            print '%s is not a pefile' % (filename)           
-        except UnboundLocalError:
-            print 'Problems with %s' % (filename)
+        except pefile.PEFormatError as pfe:
+            print '%s is not a pefile: %s' % (filename, str(pfe))           
+        except UnboundLocalError as ule:
+            print 'Problems with %s: %s' % (filename, str(ule))
+        except AttributeError as ae:
+            print 'Problems with %s: %s' % (filename, str(ae))
 
 
 if __name__ == '__main__':
