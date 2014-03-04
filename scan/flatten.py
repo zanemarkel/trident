@@ -50,8 +50,8 @@ def main():
         filename = string.split(f, '/')[-1]
         #if os.path.isfile(destination+filename):
         filename = f.replace(fromdir, "", 1).replace("/","_")
-        #os.rename(f, destination+filename)
-        shutil.copy(f, destination+filename)
+        os.rename(f, destination+filename) # for moving
+        #shutil.copy(f, destination+filename) # for copying
     
 if __name__ == "__main__":
     main()
