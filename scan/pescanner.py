@@ -196,7 +196,7 @@ def pe_analysis(pathname, ftype):
             raw_size_bool = True
         if(section.Misc_VirtualSize < section.SizeOfRawData):
             virtual_lt_raw_bool = True
-        if((section.SizeOfRawData == 0 and section.Misc_VirtualSize != 0) or \
+        if(section.SizeOfRawData == 0 or \
             (section.Misc_VirtualSize / section.SizeOfRawData > 10)):
             virtual_way_gt_raw_bool = True
         if(section.NumberOfRelocations != 0):
