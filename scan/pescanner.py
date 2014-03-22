@@ -16,7 +16,7 @@
 #
 #               Magic numbers in attribute data:
 #               BaseOfData not found -> -1
-#               Unknown (sub)language -> lang bools set to None
+#               Unknown (sub)language -> lang bools set to -1
 ###############################################################
 # TODO: add all the attribute checks 
 ###############################################################
@@ -55,7 +55,7 @@ def lang_bools(pe):
     Returns four booleans that Yonts argued might make good malware indicators.
     The booleans are: Language=0, Language>127, SubLanguage=0, SubLanguage=2"""
 
-    ret = [False, False, False, False]
+    ret = [0, 0, 0, 0]
 
     # Getting to the language attributes requires a lot of digging
     if hasattr(pe, 'DIRECTORY_ENTRY_RESOURCE'):
@@ -72,22 +72,22 @@ def lang_bools(pe):
                             # Here we check if we need to set any bools to true
                             try:
                                 if(pefile.LANG[lang] == 0):
-                                    ret[0] = True
+                                    ret[0] = 1
                                 if(pefile.LANG[lang] > 127):
-                                    ret[1] = True
+                                    ret[1] = 1
                             except KeyError:
                                 print 'KeyError!'
-                                ret[0] = None
-                                ret[1] = None
+                                ret[0] = -1
+                                ret[1] = -1
                             try:
                                 if(pefile.SUBLANG[sublang] == 0):
-                                    ret[2] = True
+                                    ret[2] = 1
                                 if(pefile.SUBLANG[sublang] == 2):
-                                    ret[3] = True
+                                    ret[3] = 1
                             except KeyError:
                                 print 'KeyError!'
-                                ret[2] = None
-                                ret[3] = None
+                                ret[2] = -1
+                                ret[3] = -1
     return ret                            
 
 
@@ -96,21 +96,21 @@ def header_line():
     Returns a CSV column header line
     Update this whenever you add attributes to be measured
     """
-    return '"Name", "NumberOfSections", "Year", \
-    "PointerToSymbolTable", "NumberOfSymbols", "BYTES_REVERSED_LO", \
-    "BYTES_REVERSED_HI", "RELOCS_STRIPPED", "LOCAL_SYMS_STRIPPED", \
-    "LINE_NUM_STRIPPED", "MajorLinkerVersion", "MinorLinkerVersion", \
-    "MajorOperatingSystemVersion", "MinorOperatingSystemVersion", \
-    "MajorImageVersion", "MinorImageVersion", "SizeOfCode", \
-    "SizeOfInitializedData", "SizeOfImage", "SizeOfHeaders", \
-    "SizeOfStackReserve", "SizeOfStackCommit", "SizeOfHeapReserve", \
-    "SizeOfHeapCommit", "AddressOfEntryPoint", "BaseOfCode", "BaseOfData", \
-    "Reserved1", "LoaderFlags", "NumberOfRvaAndSizes", "RawSize==0", \
-    "VirtualLessThanRaw", "VirtualWayGreaterThanRaw", "NumRelocation!==0", \
-    "NumLinenums!=0", "PointerToRawData==0", "PointerToRelocations!=0", \
-    "PointerToLinenumbers!=0", "LowEntropy", "HighEntropy", "Language=0", \
-    "Language>127", "SubLang=0", "SubLang=2", ".rsrc size", "sample size", \
-    "RaisedException", "isMalware"\n'
+    return 'Name, NumberOfSections, Year, \
+    PointerToSymbolTable, NumberOfSymbols, BYTES_REVERSED_LO, \
+    BYTES_REVERSED_HI, RELOCS_STRIPPED, LOCAL_SYMS_STRIPPED, \
+    LINE_NUM_STRIPPED, MajorLinkerVersion, MinorLinkerVersion, \
+    MajorOperatingSystemVersion, MinorOperatingSystemVersion, \
+    MajorImageVersion, MinorImageVersion, SizeOfCode, \
+    SizeOfInitializedData, SizeOfImage, SizeOfHeaders, \
+    SizeOfStackReserve, SizeOfStackCommit, SizeOfHeapReserve, \
+    SizeOfHeapCommit, AddressOfEntryPoint, BaseOfCode, BaseOfData, \
+    Reserved1, LoaderFlags, NumberOfRvaAndSizes, RawSize==0, \
+    VirtualLessThanRaw, VirtualWayGreaterThanRaw, NumRelocation!==0, \
+    NumLinenums!=0, PointerToRawData==0, PointerToRelocations!=0, \
+    PointerToLinenumbers!=0, LowEntropy, HighEntropy, Language=0, \
+    Language>127, SubLang=0, SubLang=2, .rsrc size, sample size, \
+    RaisedException, isMalware\n'
 
 def pe_analysis(pathname, ftype):
     """
@@ -124,7 +124,7 @@ def pe_analysis(pathname, ftype):
     # Organize the data into a list
     pe_list = []
 
-    raised_exception = False    
+    raised_exception = 0    
 
     # Name
     pe_list.append(pathname)
@@ -141,11 +141,11 @@ def pe_analysis(pathname, ftype):
     pe_list.append( pe.FILE_HEADER.NumberOfSymbols )
 
     # Characteristics flags
-    pe_list.append( pe.FILE_HEADER.IMAGE_FILE_BYTES_REVERSED_LO )
-    pe_list.append( pe.FILE_HEADER.IMAGE_FILE_BYTES_REVERSED_HI )
-    pe_list.append( pe.FILE_HEADER.IMAGE_FILE_RELOCS_STRIPPED )
-    pe_list.append( pe.FILE_HEADER.IMAGE_FILE_LOCAL_SYMS_STRIPPED )
-    pe_list.append( pe.FILE_HEADER.IMAGE_FILE_LINE_NUMS_STRIPPED )
+    pe_list.append( int(pe.FILE_HEADER.IMAGE_FILE_BYTES_REVERSED_LO) )
+    pe_list.append( int(pe.FILE_HEADER.IMAGE_FILE_BYTES_REVERSED_HI) )
+    pe_list.append( int(pe.FILE_HEADER.IMAGE_FILE_RELOCS_STRIPPED) )
+    pe_list.append( int(pe.FILE_HEADER.IMAGE_FILE_LOCAL_SYMS_STRIPPED) )
+    pe_list.append( int(pe.FILE_HEADER.IMAGE_FILE_LINE_NUMS_STRIPPED) )
 
     # OptionalHeader Version Attributes
     pe_list.append( pe.OPTIONAL_HEADER.MajorLinkerVersion )
@@ -171,7 +171,7 @@ def pe_analysis(pathname, ftype):
     try:
         pe_list.append( pe.OPTIONAL_HEADER.BaseOfData )
     except AttributeError:
-        raised_exception = True
+        raised_exception = 1
         pe_list.append( -1 ) # BaseOfData not found
 
     # OptionalHeader Misc Attributes
@@ -180,40 +180,40 @@ def pe_analysis(pathname, ftype):
     pe_list.append( pe.OPTIONAL_HEADER.NumberOfRvaAndSizes )
     
     # Section information
-    raw_size_bool = False           # RawSize == 0
-    virtual_lt_raw_bool = False     # VirtualSize > RawSize
-    virtual_way_gt_raw_bool = False # VirtualSize/RawSize > 10
-    num_relocations_bool = False    # Number of Relocations != 0
-    num_line_nums_bool = False      # Number of line-numbers != 0
-    ptr_raw_bool = False            # PointerToRawData == 0
-    ptr_reloc_bool = False          # PointerToRelocation != 0
-    ptr_line_nums_bool = False      # PointerToLinenumbers != 0
-    sml_entropy_bool = False        # Entropy < 1
-    large_entropy_bool = False      # Entropy > 7
+    raw_size_bool = 0           # RawSize == 0
+    virtual_lt_raw_bool = 0     # VirtualSize > RawSize
+    virtual_way_gt_raw_bool = 0 # VirtualSize/RawSize > 10
+    num_relocations_bool = 0    # Number of Relocations != 0
+    num_line_nums_bool = 0      # Number of line-numbers != 0
+    ptr_raw_bool = 0            # PointerToRawData == 0
+    ptr_reloc_bool = 0          # PointerToRelocation != 0
+    ptr_line_nums_bool = 0      # PointerToLinenumbers != 0
+    sml_entropy_bool = 0        # Entropy < 1
+    large_entropy_bool = 0      # Entropy > 7
     rsrc_size = -1                  # Resource Size -- will be used later
     for section in pe.sections:
         if(section.SizeOfRawData == 0):
-            raw_size_bool = True
+            raw_size_bool = 1
         if(section.Misc_VirtualSize < section.SizeOfRawData):
-            virtual_lt_raw_bool = True
+            virtual_lt_raw_bool = 1
         if(section.SizeOfRawData == 0 or \
             (section.Misc_VirtualSize / section.SizeOfRawData > 10)):
-            virtual_way_gt_raw_bool = True
+            virtual_way_gt_raw_bool = 1
         if(section.NumberOfRelocations != 0):
-            num_relocations_bool = True
+            num_relocations_bool = 1
         if(section.NumberOfLinenumbers != 0):
-            num_line_nums_bool = True
+            num_line_nums_bool = 1
         if(section.PointerToRawData == 0):
-            ptr_raw_bool = True
+            ptr_raw_bool = 1
         if(section.PointerToRelocations != 0):
-            ptr_reloc_bool = True
+            ptr_reloc_bool = 1
         if(section.PointerToLinenumbers != 0):
-            ptr_line_nums_bool = True
+            ptr_line_nums_bool = 1
         entropy = section.get_entropy() # This one really slows down the program
         if(entropy < LOW_ENTROPY):
-            sml_entropy_bool = True
+            sml_entropy_bool = 1
         if(entropy > HIGH_ENTROPY):
-            large_entropy_bool = True
+            large_entropy_bool = 1
         if( '.rsrc' in section.Name ): 
             rsrc_size = section.SizeOfRawData 
     pe_list.append(raw_size_bool)
@@ -231,8 +231,8 @@ def pe_analysis(pathname, ftype):
     # This checks the resource file languages for anything abnormal
     langs = lang_bools(pe)
     for this_bool in langs:
-        if(this_bool is None):
-            raised_exception = True
+        if(this_bool is -1):
+            raised_exception = 1
         pe_list.append(this_bool)
     
     # Resource size and the actual sample size (for comparison)
@@ -243,13 +243,18 @@ def pe_analysis(pathname, ftype):
     pe_list.append(raised_exception)
 
     # isMalware
-    pe_list.append(ftype)
+    if(ftype == 'malware'):
+        pe_list.append(1)
+    elif(ftype == 'clean'):
+        pe_list.append(0)
+    else: # ftype should be malware or clean
+        pe_list.append(-1)
 
     # Create a line of CSV from the data
     pe_list.reverse() # To pop from the other side
-    csv_str = ('"{}"'.format(pe_list.pop()) )
+    csv_str = ('{}'.format(pe_list.pop()) )
     while(pe_list):
-        csv_str += (', "{}"'.format(pe_list.pop()) )
+        csv_str += (', {}'.format(pe_list.pop()) )
 
     return csv_str
     

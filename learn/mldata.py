@@ -16,73 +16,69 @@
 # scikit learn will provide most of the baseline funtionality
 import sklearn as sk
 import numpy as np
-import re
 
-def csv2matrix(csvfile, mfile, namefile):
-    ''' A function for converting a .csv file to a matrix file for numpy.
-    Output is in the following format:
-    <feature>, <feature>, ... , <label>
-    where all features and the label are ints
+# TODO: make it easy to import and export data
+# check out numpy.recarray.tofile and .fromfile
 
-    This function also writes a name-ID translation table, because each filename
-    is converted into an ID.'''
+def load_data(csv):
+    ''' Import a csv file. Returns a structured array of the following format:
+    [[name, feature0, ..., featuren, label], [name, ..., label], ...] '''
 
-    with open(csvfile) as csv:
-        # Cut header data
-        junk = extract_headers(csv)
-        
-        # Initial Setup
-        mat = open(mfile, 'w') # the file to write the matrix to
-        names = open(namefile, 'w') # the ID-fname translation file
-        cnt = 0
-
-        for line in csv:
-            # Output ID-filename translation file
-            thisname = re.match(r'^"(.+?)"', line)
-            idline = str(cnt) + ' ' + str(thisname.group(1)) + '\n'
-            names.write(idline)
-
-            # Translate filenames to IDs
-            newline = re.sub(r'^"(.+?)"', str(cnt), line)
-
-            # replace True and malware with 1, and False and clean with 0
-            newline = newline.replace('True','1').replace('malware','1')
-            newline = newline.replace('False','0').replace('clean','0')
-
-            # replace none with -1
-            newline = newline.replace('None','-1')
-
-            # Remove quotes
-            newline = newline.replace('"','')
-
-            # Output matrix file line
-            mat.write(newline)
-
-            # increase the count for the ID
-            cnt += 1
-
-
-
-def load_data(matrixf):
-    ''' Import a matrix file. Returns a feature matrix and a label vector.''' 
-
-    matrix = open(matrixf)
+    dt = extract_headers(open(csv))
 
     # Load file data as a matrix
-    data = np.loadtxt(matrix, dtype=int, delimiter=',')
-    
-    # Remove unwanted features (this will come later)
+    data = np.genfromtxt(csv, delimiter=",", dtype=dt, skip_header=1)
 
-    # Get features
-    features = data[:, :-1]
+    return data
+
+def data_components(data):
+    ''' Converts a structured array of data into simple arrays containing the
+    features (2d array), labels, record names, and the feature names. '''
+    
+    # Get filenames
+    recnames = data['Name']
 
     # Get labels
-    labels = data[:, -1]
+    labels = data['isMalware']
 
-    return (features, labels)
+    # Get features
+    features = rm_feat_name(data, 'Name')
+    features = rm_feat_name(features, 'isMalware')
+    featnames = features.dtype.names
+    features = features.view(np.int32).reshape(features.shape + (-1,))
+
+    return (features, labels, recnames, featnames)
+
+def rm_feat_num(features, num):
+    ''' Return features, with a feature removed based on column (num)ber '''
+    names = list(features.dtype.names)
+    new_names = names[:num] + names[num+1:]
+    return features[new_names]
     
+def rm_feat_name(features, name):
+    ''' Return features, with a feature "name" removed'''
+    names = list(features.dtype.names)
+    if name in names:
+        names.remove(name)
+    return features[names]
 
 def extract_headers(openfile):
-    ''' Get the header line data ''' 
+    ''' Extract the header line names and return a numpy.dtype for the
+    dtype field of numpy.loadtxt''' 
     # for now just return the line as a string
-    return openfile.readline()
+
+    # Read the line
+    headerline = openfile.readline()
+
+    # Get the names
+    nmes = headerline.strip().replace('"','').replace(' ','').split(',')
+
+    # Generate types
+    formats = ['i4']*len(nmes)
+    formats[0] = 'a255' # First field will be the filename
+
+    # Generate dictionary 
+    dtdict = {'names':tuple(nmes), 'formats':tuple(formats) }
+    
+    # Return numpy.dtype object
+    return np.dtype(dtdict)

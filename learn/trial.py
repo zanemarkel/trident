@@ -26,20 +26,22 @@ def main():
     # been done in previous trials
 
     # When cmd line args are lacking...
-    matfile = raw_input("Which matrix file should be used? ")
+    csv = raw_input("Which file should be used? ")
     algo = raw_input("Which learning algorithm? (nb)")
 
     # Select data to read
-    features, labels = mldata.load_data(matfile)
+    data = mldata.load_data(csv)
 
     # Preprocess data
+    # TODO: fill in this part
 
-    # For now just use the data as both the training data and the test data
+    # Get the final components from the data
+    features, labels, recnames, featnames = mldata.data_components(data)
     trainx = features
     trainy = labels
     testx = features
 
-    # Check for appropriate learning algorithm
+    # Check for valid learning algorithm
     if(not mlalgos.validate_algo(algo)):
         print("Invalid learning algorithm %s" % (algo))
         sys.exit(1)
