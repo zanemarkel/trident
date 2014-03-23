@@ -4,7 +4,7 @@
 # Created:      6 MAR 2014
 #
 # Name:         mldata
-# Description : Library for data importation and feature selection
+# Description : Library for importing/exporting data and feature selection
 #
 ###############################################################################
 
@@ -22,18 +22,48 @@ import numpy as np
 
 def load_data(csv):
     ''' Import a csv file. Returns a structured array of the following format:
-    [[name, feature0, ..., featuren, label], [name, ..., label], ...] '''
+    [[name, feature0, ..., featuren, label], [name, ..., label], ...] 
+    Note: "--" will be treated as a comment delimiter. I do not expect to use
+    comments, but numpy.genfromtxt needs something.'''
 
-    dt = extract_headers(open(csv))
+    dformat = extract_headers(open(csv))
 
     # Load file data as a matrix
-    data = np.genfromtxt(csv, delimiter=",", dtype=dt, skip_header=1)
+    data = np.genfromtxt(csv, delimiter=",", dtype=dformat, skip_header=1, \
+           comments='--')
 
     return data
 
+def save_data(data, fname):
+    ''' Takes a record array (like that returned by mldata.load_data) and
+    saves it as a .csv file that could be imported by mldata.load_data. '''
+
+    # Open file for writing:
+    out = open(fname, 'w')
+    
+    # Get header names
+    hnames = data.dtype.names
+
+    # Print header names
+    hline = ', '.join(hnames) + '\n'
+    out.write(hline)
+
+    # For every line in the array...
+    for record in data:
+        # Print that line
+        # (Use list comprehension to get a string version of the record)
+        recline = ', '.join((str(x) for x in record)) + '\n'
+        out.write(recline)
+
+    # For clarity
+    return
+
+
 def data_components(data):
     ''' Converts a structured array of data into simple arrays containing the
-    features (2d array), labels, record names, and the feature names. '''
+    features (2d array), labels, record names, and the feature names.
+    This is intended to be used after preprocessing as the final step before
+    doing the actual learning.'''
     
     # Get filenames
     recnames = data['Name']
@@ -74,7 +104,7 @@ def extract_headers(openfile):
     nmes = headerline.strip().replace('"','').replace(' ','').split(',')
 
     # Generate types
-    formats = ['i4']*len(nmes)
+    formats = ['i8']*len(nmes)
     formats[0] = 'a255' # First field will be the filename
 
     # Generate dictionary 
