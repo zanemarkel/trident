@@ -16,6 +16,7 @@
 # scikit learn will provide most of the baseline funtionality
 import sklearn as sk
 import numpy as np
+import numpy.lib.recfunctions as rfunc
 
 # TODO: make it easy to import and export data
 # check out numpy.recarray.tofile and .fromfile
@@ -91,6 +92,16 @@ def rm_feat_name(features, name):
     if name in names:
         names.remove(name)
     return features[names]
+
+def append_feat(data, name, fieldarray):
+    ''' Appends fieldarray to data with the name 'name'. This allows new
+    features to be added easily. 
+    Because all new features will be built differently, it is up to you to 
+    construct the fieldarray properly. 
+    This is basically just a recast of numpy.lib.recfunctions.rec_append_fields
+    , so that I do not have to look up the function again.'''
+
+    return rfunc.rec_append_fields(data, name, fieldarray)
 
 def extract_headers(openfile):
     ''' Extract the header line names and return a numpy.dtype for the
