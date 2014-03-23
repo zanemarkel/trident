@@ -126,6 +126,14 @@ def pe_analysis(pathname, ftype):
 
     raised_exception = 0    
 
+    # isMalware
+    if(ftype == 'malware'):
+        pe_list.append(1)
+    elif(ftype == 'clean'):
+        pe_list.append(0)
+    else: # ftype should be malware or clean
+        pe_list.append(-1)
+
     # Name
     pe_list.append(pathname)
 
@@ -241,14 +249,6 @@ def pe_analysis(pathname, ftype):
 
     # RaisedException indicates if anything in the scan caused an exception to be raised
     pe_list.append(raised_exception)
-
-    # isMalware
-    if(ftype == 'malware'):
-        pe_list.append(1)
-    elif(ftype == 'clean'):
-        pe_list.append(0)
-    else: # ftype should be malware or clean
-        pe_list.append(-1)
 
     # Create a line of CSV from the data
     pe_list.reverse() # To pop from the other side
