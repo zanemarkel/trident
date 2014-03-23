@@ -59,6 +59,18 @@ def save_data(data, fname):
     # For clarity
     return
 
+def select_sample(data, howmany, fractionMalware=-1):
+    ''' Grabs a sample of data to use for learning. 
+    
+    data = the large dataset to use.
+    howmany = how many records to select.
+    fractionMalware = percent of records (0 to 1) that will be malicious'''
+# TODO: implement fractionMalware functionality
+
+# don't try to choose more records than there are in the data
+# decide which record indices to pick
+
+
 
 def data_components(data):
     ''' Converts a structured array of data into simple arrays containing the
@@ -115,8 +127,8 @@ def extract_headers(openfile):
     nmes = headerline.strip().replace('"','').replace(' ','').split(',')
 
     # Generate types
-    formats = ['i8']*len(nmes)
-    formats[0] = 'a255' # First field will be the filename
+    formats = ['i8']*len(nmes) # most entries will be 64-bit integers
+    formats[nmes.index('Name')] = 'a255' # Name field will be a string
 
     # Generate dictionary 
     dtdict = {'names':tuple(nmes), 'formats':tuple(formats) }
