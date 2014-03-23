@@ -68,7 +68,6 @@ def select_sample(seed, data, howmany, fractionMalware=-1):
     howmany = how many records to select.
     fractionMalware = percent of records (0 to 1) that will be malicious
                       default (-1) indicates no preference.'''
-# TODO: implement fractionMalware functionality
 
     # don't try to choose more records than there are in the data
     if(howmany >= len(data)):
@@ -80,8 +79,24 @@ def select_sample(seed, data, howmany, fractionMalware=-1):
     if(fractionMalware == -1): # No preference for infected:clean ratio
         indices = random.sample(range(len(data)), howmany) 
     else:
-        # still does the same thing for now
-        indices = random.sample(range(len(data)), howmany) 
+        # get indices of malicious and benign records
+        benind = np.where(data['isMalware'] == 0)[0]
+        malind = np.where(data['isMalware'] == 1)[0]
+
+        # get number of malicious and benign records that are requested
+        nummal = int(round(fractionMalware * float(howmany)))
+        numben = howmany - nummal
+
+        # get samples of those indices
+        # there's going to be an error if you ask for more than requested
+        malind = random.sample(malind, nummal)
+        benind = random.sample(benind, numben)
+
+        # concatenate the sample indices together
+        indices = malind + benind
+
+        # Shuffle indices so that the malicious records do not come before the benign records
+        random.shuffle(indices)
 
     # return only those record indices of data
     return data[indices]
