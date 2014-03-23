@@ -14,9 +14,10 @@
 # labels Y = n_samples vector of class values
 
 # scikit learn will provide most of the baseline funtionality
-import sklearn as sk
 import numpy as np
 import numpy.lib.recfunctions as rfunc
+import random
+import sys
 
 # TODO: make it easy to import and export data
 # check out numpy.recarray.tofile and .fromfile
@@ -30,7 +31,7 @@ def load_data(csv):
     dformat = extract_headers(open(csv))
 
     # Load file data as a matrix
-    data = np.genfromtxt(csv, delimiter=",", dtype=dformat, skip_header=1, \
+    data = np.genfromtxt(csv, delimiter=", ", dtype=dformat, skip_header=1, \
            comments='--')
 
     return data
@@ -59,16 +60,31 @@ def save_data(data, fname):
     # For clarity
     return
 
-def select_sample(data, howmany, fractionMalware=-1):
+def select_sample(seed, data, howmany, fractionMalware=-1):
     ''' Grabs a sample of data to use for learning. 
     
+    seed = seed to use (so that sample can be reproduced)
     data = the large dataset to use.
     howmany = how many records to select.
-    fractionMalware = percent of records (0 to 1) that will be malicious'''
+    fractionMalware = percent of records (0 to 1) that will be malicious
+                      default (-1) indicates no preference.'''
 # TODO: implement fractionMalware functionality
 
-# don't try to choose more records than there are in the data
-# decide which record indices to pick
+    # don't try to choose more records than there are in the data
+    if(howmany >= len(data)):
+        sys.stderr.write("SAMPLE IS ENTIRE DATASET!")
+        return data
+
+    # decide which record indices to pick
+    random.seed(seed)
+    if(fractionMalware == -1): # No preference for infected:clean ratio
+        indices = random.sample(range(len(data)), howmany) 
+    else:
+        # still does the same thing for now
+        indices = random.sample(range(len(data)), howmany) 
+
+    # return only those record indices of data
+    return data[indices]
 
 
 
