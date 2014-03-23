@@ -119,9 +119,9 @@ def data_components(data):
     features = rm_feat_name(data, 'Name')
     features = rm_feat_name(features, 'isMalware')
     featnames = features.dtype.names
-    features = features.view(np.int32).reshape(features.shape + (-1,))
+    simplefeatures = features.view(np.int64).reshape(features.shape + (-1,))
 
-    return (features, labels, recnames, featnames)
+    return (simplefeatures, labels, recnames, featnames)
 
 def rm_feat_num(features, num):
     ''' Return features, with a feature removed based on column (num)ber '''
