@@ -1,0 +1,10 @@
+Plan of action for VirusTotal:
+
+Write programs to interact with their API
+Make a hash db for all the files that I will upload
+    must be appendable!
+Send requests for every hash in the db
+With results, Forall {never scanned + old scans}:
+    upload file to VirusTotal
+wait
+retrieve results
