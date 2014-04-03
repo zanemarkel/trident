@@ -11,8 +11,13 @@ various machine learning algorithms'''
 ###############################################################################
 
 # scikit learn will provide most of the baseline funtionality
+import numpy as np
 from sklearn.naive_bayes import GaussianNB
 from sklearn import tree
+from sklearn import cross_validation
+import pydot
+from sklearn.externals.six import StringIO
+
 
 
 ###############################################################################
@@ -91,8 +96,38 @@ def nb_predict(model, testx):
     return model.predict(testx)
 
 ###############################################################################
-# NAIVE BAYES
+# DECISION TREE
 ###############################################################################
+
+def dt_graph(treeest, cv, scores, features, labels, featnames, outfile):
+    ''' Retrains the tree estimator using the fold with the best results
+    from the cross-validation process. Prints out a graph pdf file of 
+    that estimator.'''
+    # Hacky way to get the training data for the best fold
+    bestfold = np.argmax(scores)
+    print(bestfold)
+    cnt = 0
+    for train, _ in cv:
+
+        # Only do stuff when you've got the training indices for the best fold
+        if(cnt == bestfold):
+            # Fit
+            treeest.fit(features[train], labels[train])
+
+            # Get the dot file
+            dot_data = StringIO()
+            tree.export_graphviz(treeest, out_file=dot_data, \
+                feature_names=featnames)
+
+            # Convert the dot file to a graph
+            graph = pydot.graph_from_dot_data(dot_data.getvalue())
+            graph.write_pdf(outfile)
+            return
+        else:
+            cnt += 1
+
+    print("You should never see this text from dt_graph!")
+    return
 
 def dt_fit(trainx, trainy, seed):
     ''' Get a decision tree (CART) fit on the data '''

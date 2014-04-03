@@ -7,11 +7,8 @@
 # Description:  Controls a single machine learning trial.
 #               Basically, this program puts together all the 
 #               other programs needed to run a trial.
-#
-#               
-#               
-#               
-#               
+#               Works independently, or atrial can be called
+#               from another script
 #               
 ###############################################################
 
@@ -27,12 +24,18 @@ import pydot
 from sklearn.externals.six import StringIO
 
 def main():
-    ''' Run a single machine learning trial. ''' 
-    # TODO: make option for loading intermediate data to skip steps that have
-    # been done in previous trials
 
     # Parse the command line options
     options = clargs()
+
+    # Actually run the trial
+    atrial(options)
+
+
+def atrial(options):
+    ''' Run a single machine learning trial.''' 
+    # TODO: make option for loading intermediate data to skip steps that have
+    # been done in previous trials
 
     # Select data to read
     print("Loading data...")
@@ -59,7 +62,7 @@ def main():
 
     # Original way to run a trial... probably going to be deleted eventually
     if(options.simplyAcc):
-        oldacc(options, sample)
+        return oldacc(options, sample)
 
     # Primary way to run a trial
     else:
@@ -67,6 +70,7 @@ def main():
         printparams(options)
         print('  Measure  Average  Fold-Scores')
         perfmeasures = ['accuracy', 'precision', 'recall', 'f1']
+        avgs = []
         for perfmeasure in perfmeasures:
             # Extract the parts of the samples
             # Not yet using the filenames and feature names
@@ -82,24 +86,21 @@ def main():
                         scoring=perfmeasure, cv=cvsplits)
 
             # Print the results
-            avgstr = '{:.4}'.format(sum(scores)/len(scores)).rjust(7)
+            avgs.append(sum(scores)/len(scores))
+            avgstr = '{:.4}'.format(avgs[-1]).rjust(7)
             resultstr = '{}  {} '.format(perfmeasure.rjust(9), avgstr)
             for score in scores:
                 resultstr += ' {:.3}'.format(score)
             print(resultstr)
 
             # Icing on the cake: draw a decision tree graph
-            # Using the tree from the last fold
-            if(options.graphfile != None and \
+            # based on the fold with the best f1 score
+            if(perfmeasure=='f1' and options.graphfile != None and \
                 isinstance(est, tree.DecisionTreeClassifier)):
-                printgraph(est, options.graphfile, featnames)
+                mlalgos.dt_graph(est, cvsplits, scores, features, labels, \
+                                featnames, options.graphfile)
 
-def printgraph(treeest, graphfile, featnames):
-    ''' Prints a pdf with a graph of the decision tree '''
-    dot_data = StringIO.StringIO()
-    tree.export_graphviz(treeest, out_file=dot_data, feature_names = featnames)
-    graph = pydot.graph_from_dot_data(dot_data.getvalue())
-    graph.write_pdf(graphfile)
+        return (perfmeasures, avgs)
 
 def printparams(options):
     ''' Print the command line options for later reference '''
@@ -128,6 +129,8 @@ def clargs():
         action="store_true", help='Run a simple accuracy test instead of CV')
     parser.add_option('-g', '--graphfile', dest='graphfile', type='string', \
         help='if decision trees are used, specifies a file to write a graph to')
+    parser.add_option('-o', '--out', dest='outputfile', type='string', \
+        help='File to output results to')
     (options, _) = parser.parse_args()
     if(options.database == None):
         options.database = raw_input("csv database file? ")
@@ -173,7 +176,7 @@ def oldacc(options, sample):
     accuracy = mlstat.acc(preds, telab)
     print("Accuracy: %f" % (accuracy))
 
-
+    return (['accuracy'], [accuracy])
 
 if __name__ == '__main__':
     main()
