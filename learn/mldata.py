@@ -107,7 +107,8 @@ def data_components(data):
     ''' Converts a structured array of data into simple arrays containing the
     features (2d array), labels, record names, and the feature names.
     This is intended to be used after preprocessing as the final step before
-    doing the actual learning.'''
+    doing the actual learning.
+    Returns (features, labels, recordfilenames, featurenames)'''
     
     # Get filenames
     recnames = data['Name']
