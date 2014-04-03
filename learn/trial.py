@@ -38,12 +38,10 @@ def atrial(options):
     # been done in previous trials
 
     # Select data to read
-    print("Loading data...")
     data = mldata.load_data(options.database)
 
     # Get a sample
     if(options.numsamples != None): # Check to see if a sample was requested
-        print("Getting sample...")
         if(options.malfrac != None): 
             sample = mldata.select_sample(int(options.seed), data, \
                 options.numsamples, options.malfrac)
@@ -129,8 +127,6 @@ def clargs():
         action="store_true", help='Run a simple accuracy test instead of CV')
     parser.add_option('-g', '--graphfile', dest='graphfile', type='string', \
         help='if decision trees are used, specifies a file to write a graph to')
-    parser.add_option('-o', '--out', dest='outputfile', type='string', \
-        help='File to output results to')
     (options, _) = parser.parse_args()
     if(options.database == None):
         options.database = raw_input("csv database file? ")

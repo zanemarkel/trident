@@ -105,7 +105,6 @@ def dt_graph(treeest, cv, scores, features, labels, featnames, outfile):
     that estimator.'''
     # Hacky way to get the training data for the best fold
     bestfold = np.argmax(scores)
-    print(bestfold)
     cnt = 0
     for train, _ in cv:
 

@@ -1,0 +1,18 @@
+stuff to do before writing the paper:
+
+WEEK 1
+x command line options
+x decision trees
+x make the db larger
+x precision, recall, f1 score
+feature weight analysis
+
+WEEK 2
+x cross validation
+run trials:
+    malware prevalence: .5 .2 .1 .01 .001
+    3 seeds each
+    gini and entropy
+    nb and dt
+    listing of useful features for DT (get the graphs)
+look at feature breakdown in Weka

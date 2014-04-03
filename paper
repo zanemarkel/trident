@@ -1,0 +1,14 @@
+Paper format - start writing ~ 14 APR
+
+Intro (from proposal)
+
+Setup procedures
+
+ML algorithms (there's a lot, but we tried NB and decision trees)
+    compare results, speculate why
+
+Features
+    describe candidate features
+    information gain
+    which features turned out best
+        speculate on why

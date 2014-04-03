@@ -10,6 +10,7 @@ python-magic (python module)
 numpy
 sklearn
 requests
+pydot
 ----------------------------
 
 
