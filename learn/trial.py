@@ -64,7 +64,6 @@ def atrial(options):
 
     # Primary way to run a trial
     else:
-        print
         printparams(options)
         print('  Measure  Average  Fold-Scores')
         perfmeasures = ['accuracy', 'precision', 'recall', 'f1']
@@ -102,7 +101,7 @@ def atrial(options):
 
 def printparams(options):
     ''' Print the command line options for later reference '''
-    print('Results using: {}'.format(str(options).strip('[]') ) )
+    print('{}'.format(str(options).strip('[]') ) )
 
 def clargs():
     ''' Takes care of parsing the command line options. '''
