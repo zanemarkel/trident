@@ -46,7 +46,7 @@ do
             fi
 
             python $trial -d $db -s $k -n $samples -m $j -a $i $g > $resdir$name
-            python summarize.py -c "$k" $resdir$name >> $sumfi
+            python summarize.py -c "$i,$j,$k" $resdir$name >> $sumfi
         done
     done
 done

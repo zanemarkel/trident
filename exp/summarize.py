@@ -48,7 +48,7 @@ def summarize(args):
 
 
         # Append the comments
-        summary += ' {}'.format(args.comments)
+        summary += '{}'.format(args.comments)
 
         # Output the csv line
         print(summary)
