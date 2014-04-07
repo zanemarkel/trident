@@ -45,8 +45,8 @@ do
                 g="-g "$gradir$name"-graph.pdf"
             fi
 
-            echo "python $trial -d $db -s $k -n $samples -m $j -a $i $g > $resdir$name"
-            #python summarize.py -c "$k" $resdir$name >> $sumfi
+            python $trial -d $db -s $k -n $samples -m $j -a $i $g > $resdir$name
+            python summarize.py -c "$k" $resdir$name >> $sumfi
         done
     done
 done
