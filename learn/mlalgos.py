@@ -35,6 +35,9 @@ def get_estimator(algoname, seed=0):
 
     if(algoname == 'dt'):
         return tree.DecisionTreeClassifier(random_state = seed)
+    if(algoname == 'dte'):
+        return tree.DecisionTreeClassifier(random_state = seed, \
+                criterion="entropy")
 
     # You only get here if the string was invalid
     print("Unrecognized algorithm name")
@@ -52,6 +55,8 @@ dt = Decision Tree (CART)
 
     if(algoname == 'dt'):
         return dt_fit(trainx, trainy, seed)
+    if(algoname == 'dte'):
+        return dte_fit(trainx, trainy, seed)
 
     # You only get here if the string was invalid
     print("Unrecognized algorithm name")
@@ -134,6 +139,18 @@ def dt_fit(trainx, trainy, seed):
     model = cdt.fit(trainx, trainy)
     return model
 
+def dte_fit(trainx, trainy, seed):
+    ''' Get a decision tree (CART) fit on the data 
+    Uses information gain instead of gini'''
+    cdt = tree.DecisionTreeClassifier(random_state = seed, criterion='entropy')
+    model = cdt.fit(trainx, trainy)
+    return model
+
+def dte_predict(model, testx):
+    ''' Make predictions using a CART decision tree.
+    Uses information gain instead of gini'''
+    return model.predict(testx)
+
 def dt_predict(model, testx):
     ''' Make predictions using a CART decision tree. '''
     return model.predict(testx)
@@ -144,7 +161,7 @@ def dt_predict(model, testx):
 
 def validate_algo(algostr):
     ''' Checks whether a string specifies a valid learning algorithm '''
-    valids = {'nb', 'dt'}
+    valids = {'nb', 'dt', 'dte'}
 
     if algostr in valids:
         return True

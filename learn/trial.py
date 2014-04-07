@@ -111,7 +111,7 @@ def clargs():
     parser.add_option('-d', '--database', dest='database', type='string', \
         help='The csv database file to use')
     parser.add_option('-a', '--algo', dest='algorithm', type='string', \
-        help='The learning algorithm to use (nb, dt)')
+        help='The learning algorithm to use (nb, dt, dte)')
     parser.add_option('-s', '--seed', dest='seed', type='int', \
         help='integer seed to use (for repeating random trials)')
     parser.add_option('-n', '--numsamples', dest='numsamples', type='int', \
@@ -130,7 +130,7 @@ def clargs():
     if(options.database == None):
         options.database = raw_input("csv database file? ")
     if(options.algorithm == None):
-        options.algorithm = raw_input("learning algorithm? (nb, dt) ")
+        options.algorithm = raw_input("learning algorithm? (nb, dt, dte) ")
     if(options.seed == None):
         options.seed = raw_input("seed? (must be an int) ")
 
