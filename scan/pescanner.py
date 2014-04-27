@@ -96,7 +96,7 @@ def header_line():
     Returns a CSV column header line
     Update this whenever you add attributes to be measured
     """
-    return 'Name, NumberOfSections, Year, \
+    return 'isMalware, Name, NumberOfSections, Year, \
     PointerToSymbolTable, NumberOfSymbols, BYTES_REVERSED_LO, \
     BYTES_REVERSED_HI, RELOCS_STRIPPED, LOCAL_SYMS_STRIPPED, \
     LINE_NUM_STRIPPED, MajorLinkerVersion, MinorLinkerVersion, \
@@ -110,7 +110,7 @@ def header_line():
     NumLinenums!=0, PointerToRawData==0, PointerToRelocations!=0, \
     PointerToLinenumbers!=0, LowEntropy, HighEntropy, Language=0, \
     Language>127, SubLang=0, SubLang=2, .rsrc size, sample size, \
-    RaisedException, isMalware\n'
+    RaisedException\n'
 
 def pe_analysis(pathname, ftype):
     """
