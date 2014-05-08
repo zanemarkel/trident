@@ -107,7 +107,7 @@ def clargs():
     ''' Takes care of parsing the command line options. '''
     # Handle options
     # TODO: switch to argparse
-    parser = optparse.OptionParser("usage: %prog -d <directory>")
+    parser = optparse.OptionParser("usage: %prog [OPTIONS]")
     parser.add_option('-d', '--database', dest='database', type='string', \
         help='The csv database file to use')
     parser.add_option('-a', '--algo', dest='algorithm', type='string', \
