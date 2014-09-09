@@ -1,5 +1,5 @@
 """ Run a single machine learning trial. """
-###############################################################
+################################################################################
 # Author:       Zane Markel
 # Created:      20 FEB 2013
 #
@@ -9,9 +9,10 @@
 #               other programs needed to run a trial.
 #               Works independently, or atrial can be called
 #               from another script
-###############################################################
+# NOTE:         This version is incompatible with ACY2015 files.
+################################################################################
 
-import mldata
+import spr14mldata as mldata
 import mlalgos
 import mlstat
 import sys
@@ -44,7 +45,7 @@ def atrial(options):
     if(options.numsamples != None): # Check to see if a sample was requested
         if(options.malfrac != None):
             sample = mldata.select_sample(int(options.seed), data, \
-                options.numsamples, options.malfrac[0])
+                options.numsamples, options.malfrac)
         else: # Only use a percent malware if one was specified
             sample = mldata.select_sample(int(options.seed), data,
                 options.numsamples)
@@ -55,11 +56,11 @@ def atrial(options):
     # TODO: fill in this part
 
     # If specified, output the current database
-    if(options.exportdb != None):
-        mldata.save_data(sample, options.exportdb)
+    if(options.newdb != None):
+        mldata.save_data(sample, options.newdb)
 
     # Original way to run a trial... probably going to be deleted eventually
-    if(options.acc):
+    if(options.simplyAcc):
         return oldacc(options, sample)
 
     # Primary way to run a trial
@@ -106,33 +107,6 @@ def printparams(options):
 def clargs():
     ''' Takes care of parsing the command line options. '''
 
-    parser = argparse.ArgumentParser(
-        description='Run a single machine learning trial')
-    parser.add_argument('database', type=argparse.FileType('r'), \
-        help='The csv database file to use')
-    parser.add_argument('algorithm', choices=['nb', 'dt', 'dte'], \
-        help='The learning argument to use.')
-    parser.add_argument('-s', '--seed', type=int, required=True, \
-        help='integer seed to use (for repeating random trials)')
-    parser.add_argument('-n', '--numsamples', type=int, \
-        help='integer number of samples to use from the database \
-        if unspecified, all samples will be used.')
-    parser.add_argument('-m', '--malfrac', nargs=2, type=float, \
-        metavar=('TRNG', 'TEST'), \
-        help='fraction (as a decimal) of samples that will be malicious. \
-        TRNG is the fraction for the training data. \
-        TEST is the fraction for the test data. \
-        Has no effect unless --numsamples is used')
-    parser.add_argument('-e', '--exportdb', type=argparse.FileType('w'), \
-        help='file to export post-sampled/preprocessed database to')
-    parser.add_argument('--acc', default=False, action='store_true', \
-        help='Run a simple accuracy trial without CV')
-    # The graphfile is taken as a string, because that's how the library takes it
-    parser.add_argument('-g', '--graphfile', \
-        help='if decision trees are used, specifies a file to write a graph to')
-    args = parser.parse_args()
-
-    '''
     # Handle options
     # TODO: switch to argparse
     parser = optparse.OptionParser("usage: %prog [OPTIONS]")
@@ -161,9 +135,8 @@ def clargs():
         options.algorithm = raw_input("learning algorithm? (nb, dt, dte) ")
     if(options.seed == None):
         options.seed = raw_input("seed? (must be an int) ")
-        '''
 
-    return args
+    return options
 
 def oldacc(options, sample):
     ''' The simpleAcc way of running a trial ''' 

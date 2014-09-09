@@ -28,7 +28,7 @@ def load_data(csv):
     Note: "--" will be treated as a comment delimiter. I do not expect to use
     comments, but numpy.genfromtxt needs something.'''
 
-    dformat = extract_headers(csv)
+    dformat = extract_headers(open(csv))
 
     # Load file data as a matrix
     data = np.genfromtxt(csv, delimiter=", ", dtype=dformat, skip_header=1, \
@@ -36,23 +36,26 @@ def load_data(csv):
 
     return data
 
-def save_data(data, outfile):
+def save_data(data, fname):
     ''' Takes a record array (like that returned by mldata.load_data) and
     saves it as a .csv file that could be imported by mldata.load_data. '''
 
+    # Open file for writing:
+    out = open(fname, 'w')
+    
     # Get header names
     hnames = data.dtype.names
 
     # Print header names
     hline = ', '.join(hnames) + '\n'
-    outfile.write(hline)
+    out.write(hline)
 
     # For every line in the array...
     for record in data:
         # Print that line
         # (Use list comprehension to get a string version of the record)
         recline = ', '.join((str(x) for x in record)) + '\n'
-        outfile.write(recline)
+        out.write(recline)
 
     # For clarity
     return

@@ -10,7 +10,10 @@ python-magic (python module)
 numpy
 sklearn
 requests
-pydot
+python-pydot 
+    NOTE:   this is not the same as pydot
+            use sudo apt-get install python-pydot
+            vice sudo pip install pydot
 ----------------------------
 
 
