@@ -57,8 +57,63 @@ def save_data(data, outfile):
     # For clarity
     return
 
+def train_test_split(seed, labels, numsamples, malprev):
+    ''' Returns indices [2 numpy arrays] for training and test data.
+    
+    seed = seed to use (so that sample can be reproduced)
+    labels = numpy array of record labels. Assuming that malware=1 and benign=0
+    numsamples = (number of training samples, number of test samples)
+    malprev = (malprev for training, malprev for test)
+    NOTE: malprev should be a number between 0 and 1,
+    0.5 would indicate 50% of that part of the sample should be malware
+    '''
+    numtrng = numsamples[0]
+    numtest= numsamples[1]
+    malprevtrng = malprev[0]
+    malprevtest = malprev[1]
+
+    # don't try to choose more records than there are in the data
+    if(sum(numsamples) > len(labels)):
+        sys.stderr.write("Requested {} samples, but data has {} records".\
+            format(numsamples, len(labels)))
+        raise Exception("Sample size is too large!\n")
+
+    # get number of malicious and benign records for both training and test data
+    nummaltrng = int(round(malprevtrng * float(numtrng)))
+    numbentrng = numtrng - nummaltrng
+    nummaltest = int(round(malprevtest * float(numtest)))
+    numbentest = numtest - nummaltest
+
+    # get indices of malicious and benign records
+    benidx = np.where(labels == 0)[0] # [0] gets array outta the list
+    malidx = np.where(labels == 1)[0]
+
+    # throw errors if there are not enough benign or malicious examples
+    if(numbentrng + numbentest > len(benidx)):
+        raise Exception("Not enough benign examples!")
+    if(nummaltrng + nummaltest > len(malidx)):
+        raise Exception("Not enough malicious examples!")
+
+    #shuffle indices to ensure training and test data are split randomly
+    random.seed(seed)
+    random.shuffle(benidx)
+    random.shuffle(malidx)
+
+    # get the indices for training and test data
+    trngidx = np.append(benidx[0:numbentrng], malidx[0:nummaltrng])
+    testidx = np.append(benidx[numbentrng:numbentrng+numbentest], \
+              malidx[nummaltrng:nummaltrng+nummaltest])
+
+    # Now shuffle trngidx and testidx so ordering doesn't skew learning
+    random.shuffle(trngidx)
+    random.shuffle(testidx)
+
+    return [trngidx, testidx]
+
 def select_sample(seed, data, howmany, fractionMalware=-1):
-    ''' Grabs a sample of data to use for learning. 
+    ''' This function is only kept for legacy's sake.
+    
+    Grabs a sample of data to use for learning. 
     
     seed = seed to use (so that sample can be reproduced)
     data = the large dataset to use.
@@ -68,7 +123,7 @@ def select_sample(seed, data, howmany, fractionMalware=-1):
 
     # don't try to choose more records than there are in the data
     if(howmany >= len(data)):
-        sys.stderr.write("SAMPLE IS ENTIRE DATASET!")
+        sys.stderr.write("SAMPLE IS ENTIRE DATASET! ")
         return data
 
     # decide which record indices to pick
@@ -77,8 +132,8 @@ def select_sample(seed, data, howmany, fractionMalware=-1):
         indices = random.sample(range(len(data)), howmany) 
     else:
         # get indices of malicious and benign records
-        benind = np.where(data['isMalware'] == 0)[0]
-        malind = np.where(data['isMalware'] == 1)[0]
+        benidx = np.where(data['isMalware'] == 0)[0]
+        malidx = np.where(data['isMalware'] == 1)[0]
 
         # get number of malicious and benign records that are requested
         nummal = int(round(fractionMalware * float(howmany)))
@@ -86,11 +141,11 @@ def select_sample(seed, data, howmany, fractionMalware=-1):
 
         # get samples of those indices
         # there's going to be an error if you ask for more than requested
-        malind = random.sample(malind, nummal)
-        benind = random.sample(benind, numben)
+        malidx = random.sample(malidx, nummal)
+        benidx = random.sample(benidx, numben)
 
         # concatenate the sample indices together
-        indices = malind + benind
+        indices = malidx + benidx
 
         # Shuffle indices so that the malicious records do not come before the benign records
         random.shuffle(indices)
