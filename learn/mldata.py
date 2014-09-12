@@ -64,8 +64,8 @@ def train_test_split(seed, labels, numsamples, malprev):
     labels = numpy array of record labels. Assuming that malware=1 and benign=0
     numsamples = (number of training samples, number of test samples)
     malprev = (malprev for training, malprev for test)
-    NOTE: malprev should be a number between 0 and 1,
-    0.5 would indicate 50% of that part of the sample should be malware
+    NOTE: malprev should be a float between 0 and 1,
+          0.5 would indicate 50% of that part of the sample should be malware
     '''
     numtrng = numsamples[0]
     numtest= numsamples[1]
@@ -108,7 +108,39 @@ def train_test_split(seed, labels, numsamples, malprev):
     random.shuffle(trngidx)
     random.shuffle(testidx)
 
-    return [trngidx, testidx]
+    return (trngidx, testidx)
+
+def gen_seeds(original, numseeds, maxint=10000000):
+    ''' Returns a list of random seeds. 
+    
+    original = the original seed, used to seed the generator
+    numseeds = the number of seeds to return
+    maxint = the largest allowed integer. Default is 10^7'''
+
+    # seed random
+    np.random.seed(original)
+    return np.random.randint(maxint, size=numseeds)
+
+def gen_splits(seeds, labels, numsamples, malprev):
+    ''' Returns a list of training and test data splits shaped like
+    [(np.array training data, np.array test data),
+     (np.array training data, np.array test data),
+     (np.array training data, np.array test data),
+     ...]
+
+    seeds = list of random seeds to use. Will determine the number of splits made.
+    labels = numpy array of record labels. Assuming malware=1 and benign=0
+    numsamples = (number of training samples, number of test samples)
+    malprev = (malprev for training, malprev for test)
+    NOTE: malprev should be a float between 0 and 1,
+          0.5 would indicate 50% of that part of the sample should be malware
+     '''
+    splits = []
+    for seed in seeds:
+        splits.append(train_test_split(seed, labels, numsamples, malprev))
+
+    return splits
+  
 
 def select_sample(seed, data, howmany, fractionMalware=-1):
     ''' This function is only kept for legacy's sake.
