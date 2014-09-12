@@ -22,3 +22,19 @@ def acc(pred, true):
     tot = len(pred)
 
     return float(corr) / float(tot)
+
+def print_results_header():
+    ''' standard output file header '''
+    print('  Measure  Average   StdDev Fold-Scores')
+
+def printresults(perfmeasure, scores):
+    ''' Prints a standard string summarizing several scores. '''
+    # Print the results
+    avgstr = '{:.4}'.format(scores.mean()).rjust(9)
+    stdstr = '{:.4}'.format(scores.std()).rjust(9)
+    resultstr = '{}{}{} '.format(perfmeasure.rjust(9), avgstr, stdstr)
+    for score in scores:
+        resultstr += ' {:.3}'.format(score)
+    print(resultstr)
+    return
+

@@ -7,7 +7,7 @@
 # Description:  Controls a single machine learning trial.
 #               Basically, this program puts together all the 
 #               other programs needed to run a trial.
-#               Works independently, or atrial can be called
+#               Works independently, or oldtrial can be called
 #               from another script
 ###############################################################
 
@@ -33,6 +33,75 @@ def main():
 
 
 def atrial(options):
+    ''' Runs a single machine learning trial. '''
+    
+    # Load the data
+    data = mldata.load_data(options.database)
+
+    # Preprocess data
+    # TODO: fill in this part
+
+    # If specified, output the current database
+    if(options.exportdb != None):
+        mldata.save_data(data, options.exportdb)
+
+    # Extract the basic data from the data
+    features, labels, _, featnames = mldata.data_components(data)
+
+    # Get the seeds for the splits.
+    numsplits = 10 # Make this an option later, if need be.
+    seeds = mldata.gen_seeds(options.seed, numsplits)
+
+    # Generate the splits
+    # For now, training data will compose 90% of each split.
+    # Possibly make the an option later.
+    tr_te_sizes = [int(round(0.9*options.numsamples)), \
+        options.numsamples-int(round(0.9*options.numsamples))]
+    splits = mldata.gen_splits(seeds, labels, tr_te_sizes, options.malfrac) 
+
+    # Start printing the results
+    printparams(options)
+    mlstat.print_results_header()
+
+    # Fit and score based on the various performance measures
+    perfmeasures = ['accuracy', 'precision', 'recall', 'f1']
+    for perfmeasure in perfmeasures:
+        score_on_splits(perfmeasure, options, features, labels, featnames, splits)
+
+    return
+
+def score_on_splits(perfmeasure, options, features, labels, featnames, splits):
+    ''' Actually do the fitting and evaluating.
+
+    perfmeasure = scoring mechanic. e.g. 'accuracy', 'precision', 'recall', 'f1'
+    options = the command line arguments
+    features = the data records
+    labels = the data labels
+    featnames = names of the features of each record. From mldata.data_component
+    splits = the results of, say, mldata.gen_splits
+
+    returns (average of scores, standard deviation of scores, and the scores)
+    '''
+
+    # Score the splits
+    est = mlalgos.get_estimator(options.algorithm)
+    scores = cross_validation.cross_val_score(est, features, y=labels, \
+                scoring=perfmeasure, cv=splits)
+
+    # Print the results
+    mlstat.printresults(perfmeasure, scores)
+
+    # Icing on the cake: draw a decision tree graph
+    # based on the fold with the best f1 score
+    if(perfmeasure=='f1' and options.graphfile != None and \
+        isinstance(est, tree.DecisionTreeClassifier)):
+        mlalgos.dt_graph(est, splits, scores, features, labels, \
+                        featnames, options.graphfile)
+
+    return (scores.mean(), scores.std(), scores)
+
+
+def oldtrial(options):
     ''' Run a single machine learning trial.''' 
     # TODO: make option for loading intermediate data to skip steps that have
     # been done in previous trials
@@ -51,9 +120,6 @@ def atrial(options):
     else:
         sample = data
 
-    # Preprocess data
-    # TODO: fill in this part
-
     # If specified, output the current database
     if(options.exportdb != None):
         mldata.save_data(sample, options.exportdb)
@@ -65,7 +131,7 @@ def atrial(options):
     # Primary way to run a trial
     else:
         printparams(options)
-        print('  Measure  Average  Fold-Scores')
+        mlstat.print_results_header()
         perfmeasures = ['accuracy', 'precision', 'recall', 'f1']
         avgs = []
         for perfmeasure in perfmeasures:
@@ -115,14 +181,12 @@ def clargs():
     parser.add_argument('-s', '--seed', type=int, required=True, \
         help='integer seed to use (for repeating random trials)')
     parser.add_argument('-n', '--numsamples', type=int, \
-        help='integer number of samples to use from the database \
-        if unspecified, all samples will be used.')
+        help='integer number of samples to use from the database.')
     parser.add_argument('-m', '--malfrac', nargs=2, type=float, \
-        metavar=('TRNG', 'TEST'), \
+        metavar=('TRNG', 'TEST'), required=True, \
         help='fraction (as a decimal) of samples that will be malicious. \
         TRNG is the fraction for the training data. \
-        TEST is the fraction for the test data. \
-        Has no effect unless --numsamples is used')
+        TEST is the fraction for the test data.')
     parser.add_argument('-e', '--exportdb', type=argparse.FileType('w'), \
         help='file to export post-sampled/preprocessed database to')
     parser.add_argument('--acc', default=False, action='store_true', \
@@ -131,37 +195,6 @@ def clargs():
     parser.add_argument('-g', '--graphfile', \
         help='if decision trees are used, specifies a file to write a graph to')
     args = parser.parse_args()
-
-    '''
-    # Handle options
-    # TODO: switch to argparse
-    parser = optparse.OptionParser("usage: %prog [OPTIONS]")
-    parser.add_option('-d', '--database', dest='database', type='string', \
-        help='The csv database file to use')
-    parser.add_option('-a', '--algo', dest='algorithm', type='string', \
-        help='The learning algorithm to use (nb, dt, dte)')
-    parser.add_option('-s', '--seed', dest='seed', type='int', \
-        help='integer seed to use (for repeating random trials)')
-    parser.add_option('-n', '--numsamples', dest='numsamples', type='int', \
-        help='integer number of samples to use from the database \
-        if unspecified, all samples will be used.')
-    parser.add_option('-m', '--percentmalicious', dest='malfrac', type='float'\
-        , help='fraction of samples that will be malicious \t\t\
-        has no effect unless --numsamples is used')
-    parser.add_option('-e', '--export', dest='newdb', type='string', \
-        help='file to export post-sampled/preprocessed database to')
-    parser.add_option('--acc', dest='simplyAcc', default=False, \
-        action="store_true", help='Run a simple accuracy test instead of CV')
-    parser.add_option('-g', '--graphfile', dest='graphfile', type='string', \
-        help='if decision trees are used, specifies a file to write a graph to')
-    (options, _) = parser.parse_args()
-    if(options.database == None):
-        options.database = raw_input("csv database file? ")
-    if(options.algorithm == None):
-        options.algorithm = raw_input("learning algorithm? (nb, dt, dte) ")
-    if(options.seed == None):
-        options.seed = raw_input("seed? (must be an int) ")
-        '''
 
     return args
 
