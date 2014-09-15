@@ -231,6 +231,21 @@ def append_feat(data, name, fieldarray):
 
     return rfunc.rec_append_fields(data, name, fieldarray)
 
+def only_features(data, features):
+    ''' only_features takes data and a list of features, and it removes every
+    feature field in data that is not in the list of features. This modified
+    version of data is returned.'''
+
+    originals = data.dtype.names # the original features
+
+    data_mod = data # this is the data that will be returned
+
+    for feat in originals:
+        if(feat not in features):
+            data_mod = rm_feat_name(data_mod, feat)
+
+    return data_mod
+
 def extract_headers(openfile):
     ''' Extract the header line names and return a numpy.dtype for the
     dtype field of numpy.loadtxt''' 
