@@ -1,6 +1,0 @@
-{'algorithm': 'nb', 'database': 'test1', 'numsamples': None, 'graphfile': None, 'seed': 67876787678, 'simplyAcc': False, 'newdb': None, 'malfrac': None}
-  Measure  Average  Fold-Scores
- accuracy   0.7884  0.77 0.794 0.789 0.789 0.799 0.796 0.794 0.787 0.765 0.801
-precision   0.9871  0.975 0.987 1.0 0.993 0.997 0.987 0.99 0.986 0.975 0.981
-   recall   0.5844  0.554 0.596 0.578 0.582 0.6 0.6 0.594 0.582 0.544 0.614
-       f1    0.734  0.707 0.743 0.733 0.734 0.749 0.746 0.742 0.732 0.698 0.755
