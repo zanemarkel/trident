@@ -23,7 +23,7 @@ gradir=$5
 # just a test
 #echo $db' '$resdir' '$sumfi
 
-samples=50000 # Keep the number of samples constant
+samples=25000 # Keep the number of samples constant
 algs=('nb' 'dt')
 malfracs=('0.5' '0.1' '0.01' '0.001')
 seeds=('102938')
