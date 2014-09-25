@@ -27,6 +27,7 @@ alg='dte'
 malfracs='0.5 0.5'
 seed='1029384756'
 
+echo "accuracy,precision,recall,f1,algorithm,malfrac_tr,malfrac_te,seed,feature" > $sumfi
 for file in $dir/*
 do
     bname=$(basename $file)
