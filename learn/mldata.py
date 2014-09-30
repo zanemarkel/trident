@@ -31,7 +31,7 @@ def load_data(csv):
     dformat = extract_headers(csv)
 
     # Load file data as a matrix
-    data = np.genfromtxt(csv, delimiter=", ", dtype=dformat, skip_header=1, \
+    data = np.genfromtxt(csv, delimiter=", ", dtype=dformat, skip_header=0, \
            comments='--')
 
     return data
