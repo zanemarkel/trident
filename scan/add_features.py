@@ -6,6 +6,7 @@ NOTE: Make sure you haven't moved around files from their github arrangement!'''
 # 30 SEP 14
 
 # Get mldata
+import argparse
 import imp
 fp, pathname, descr = imp.find_module('mldata', ['../learn/'])
 mldata = imp.load_module('mldata', fp, pathname, descr)
@@ -32,4 +33,48 @@ def valid_dbs(originaldb, newdata):
 
     return record_equivalence(originaldb, newdata)
 
-# TODO: load data -> valid_dbs -> add fields from newdata not in originaldb
+def fold_dbs(originaldb, newdata):
+    ''' Adds the fields in newdata into originaldb. '''
+
+    # Names of the fields
+    ofields = originaldb.dtype.names
+    nfields = newdata.dtype.names
+
+    retdb = originaldb
+
+    for field in nfields:
+        if field not in ofields:
+            retdb = mldata.append_feat(retdb, field, newdata[field])
+
+    return retdb
+
+def add_features(originaldb, newdata, outfile):
+    ''' originaldb, newdata, and outfile must all be open files.
+    This function checks to see if newdata has valid new fields to add to
+    originaldb. If it does, then the new database is written to outfile. '''
+
+    odb = mldata.load_data(originaldb)
+    ndb = mldata.load_data(newdata)
+
+    if not valid_dbs(odb, ndb):
+        raise Exception('The provided databases are not compatible!')
+
+    mldata.save_data(fold_dbs(odb, ndb), outfile)
+
+    return # just for closure
+
+def main():
+    argp = argparse.ArgumentParser()
+    argp.add_argument('database', type=argparse.FileType('r'), \
+        help='The original database that you want to add to.')
+    argp.add_argument('newdata', type=argparse.FileType('r'), \
+        help='The csv with new data fields you want to add to the database.\n\
+        Must account for the same files in the same order as the database.')
+    argp.add_argument('outfile', type=argparse.FileType('w'), \
+        help='The filename of the resultant database.')
+    args = argp.parse_args()
+
+    add_features(args.database, args.newdata, args.outfile)
+
+if __name__ == '__main__':
+    main()
