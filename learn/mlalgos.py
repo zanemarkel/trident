@@ -13,6 +13,7 @@ various machine learning algorithms'''
 # scikit learn will provide most of the baseline funtionality
 import numpy as np
 from sklearn.naive_bayes import GaussianNB
+from sklearn.linear_model import LogisticRegression
 from sklearn import tree
 from sklearn import cross_validation
 import pydot
@@ -38,6 +39,8 @@ def get_estimator(algoname, seed=0):
     if(algoname == 'dte'):
         return tree.DecisionTreeClassifier(random_state = seed, \
                 criterion="entropy")
+    if(algoname == 'lr'):
+        return LogisticRegression(penalty='l1', class_weight='auto', random_state=seed)
 
     # You only get here if the string was invalid
     print("Unrecognized algorithm name")
@@ -101,6 +104,26 @@ def nb_predict(model, testx):
     return model.predict(testx)
 
 ###############################################################################
+# LOGISTIC REGRESSION
+###############################################################################
+
+# LR fit on data
+# Returns a LogisticRegression.fit object
+def lr_fit(trainx, trainy, seed=0):
+    ''' Get a LR fit on the data '''
+    # This can be updated later to use partial_fit to do big data learning
+    lr = LogisticRegression(penalty='l1', class_weight='auto', random_state=seed)
+    model = lr.fit(trainx, trainy)
+    return model
+
+# Simply makes predictions on the testdata
+# Returns a vector of predictions
+def lr_predict(model, testx):
+    ''' Make predictions using LR ''' 
+    return model.predict(testx)
+
+
+###############################################################################
 # DECISION TREE
 ###############################################################################
 
@@ -161,7 +184,7 @@ def dt_predict(model, testx):
 
 def validate_algo(algostr):
     ''' Checks whether a string specifies a valid learning algorithm '''
-    valids = {'nb', 'dt', 'dte'}
+    valids = {'nb', 'dt', 'dte', 'lr'}
 
     if algostr in valids:
         return True

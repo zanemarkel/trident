@@ -84,7 +84,7 @@ def score_on_splits(perfmeasure, options, features, labels, featnames, splits):
     '''
 
     # Score the splits
-    est = mlalgos.get_estimator(options.algorithm)
+    est = mlalgos.get_estimator(options.algorithm, seed=options.seed)
     scores = cross_validation.cross_val_score(est, features, y=labels, \
                 scoring=perfmeasure, cv=splits)
 
@@ -176,7 +176,7 @@ def clargs():
         description='Run a single machine learning trial')
     parser.add_argument('database', type=argparse.FileType('r'), \
         help='The csv database file to use')
-    parser.add_argument('algorithm', choices=['nb', 'dt', 'dte'], \
+    parser.add_argument('algorithm', choices=['nb', 'dt', 'dte', 'lr'], \
         help='The learning argument to use.')
     parser.add_argument('-s', '--seed', type=int, required=True, \
         help='integer seed to use (for repeating random trials)')
