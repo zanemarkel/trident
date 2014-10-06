@@ -29,10 +29,10 @@ def main():
     options = clargs()
 
     # Actually run the trial
-    atrial(options)
+    sometrials(options)
 
 
-def atrial(options):
+def sometrials(options):
     ''' Runs a single machine learning trial. '''
     
     # Load the data
@@ -183,7 +183,7 @@ def clargs():
     parser.add_argument('-n', '--numsamples', type=int, \
         help='integer number of samples to use from the database.')
     parser.add_argument('-m', '--malfrac', nargs=2, type=float, \
-        metavar=('TRNG', 'TEST'), required=True, \
+        metavar=('TRNG', 'TEST'), \
         help='fraction (as a decimal) of samples that will be malicious. \
         TRNG is the fraction for the training data. \
         TEST is the fraction for the test data.')

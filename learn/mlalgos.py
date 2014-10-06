@@ -112,8 +112,8 @@ def nb_predict(model, testx):
 def lr_fit(trainx, trainy, seed=0):
     ''' Get a LR fit on the data '''
     # This can be updated later to use partial_fit to do big data learning
-    lr = LogisticRegression(penalty='l1', class_weight='auto', random_state=seed)
-    model = lr.fit(trainx, trainy)
+    lr_est = LogisticRegression(penalty='l1', class_weight='auto', random_state=seed)
+    model = lr_est.fit(trainx, trainy)
     return model
 
 # Simply makes predictions on the testdata
@@ -121,6 +121,29 @@ def lr_fit(trainx, trainy, seed=0):
 def lr_predict(model, testx):
     ''' Make predictions using LR ''' 
     return model.predict(testx)
+
+def lr_crossv_getC(trainx, trainy, Carr=[0.1, 1.0, 10.0, 100.0], seed=0):
+    ''' Get an appropriate C value for the LR. 
+    Carr is the array of C values to test. '''
+    
+    # Get stratified k folds
+    skf = cross_validation.StratifiedKFold(trainy, n_folds=10)
+
+    # Cross-validate for the best C
+    best_c = 0
+    best_score = 0
+    for this_c in Carr:
+        lr_est = LogisticRegression(penalty='l1', class_weight='auto', C=this_c, random_state=seed)
+        scores = cross_validation.cross_val_score(lr_est, trainx, y=trainy, \
+                    scoring='f1', cv=skf)
+        # If this this_c scored, on average, better than the best C value so far, update best_c
+        this_score = scores.mean()
+        print 'This score and C: ', this_score, this_c
+        if this_score > best_score:
+            best_score = this_score
+            best_c = this_c
+
+    return best_c
 
 
 ###############################################################################
