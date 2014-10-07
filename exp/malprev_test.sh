@@ -24,7 +24,7 @@ gradir=$5
 #echo $db' '$resdir' '$sumfi
 
 samples=25000 # Keep the number of samples constant
-algs=('nb' 'dt')
+algs=('nb' 'dt', 'lr')
 malfracs=('0.5' '0.1' '0.01' '0.001')
 seeds=('102938')
 
@@ -53,6 +53,10 @@ do
             # Only do this if the malfrac is not already 0.5
             if [ "$j" != "0.5" ]
             then
+
+                name="res-"$i"-0.5-"$j"-"$k
+                echo $name 
+
                 # Var to print a graph for decision trees
                 g=""
                 if [[ $i = "dt" || $i = "dte" ]]
@@ -60,8 +64,6 @@ do
                     g="-g "$gradir$name"-graph.pdf"
                 fi
 
-                name="res-"$i"-0.5-"$j"-"$k
-                echo $name 
                 python $trial -s $k -n $samples -m 0.5 $j $g $1 $i > $resdir$name
                 python summarize.py -c "$i,0.5,$j,$k" $resdir$name >> $sumfi
             fi
