@@ -14,6 +14,9 @@ various machine learning algorithms'''
 import numpy as np
 from sklearn.naive_bayes import GaussianNB
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier as RFC
+from sklearn.ensemble import AdaBoostClassifier as ABC
+from sklearn.ensemble import BaggingClassifier as BAC
 from sklearn import tree
 from sklearn import cross_validation
 import pydot
@@ -35,12 +38,19 @@ def get_estimator(algoname, seed=0):
         return GaussianNB()
 
     if(algoname == 'dt'):
-        return tree.DecisionTreeClassifier(random_state = seed)
+        return tree.DecisionTreeClassifier(random_state=seed)
     if(algoname == 'dte'):
-        return tree.DecisionTreeClassifier(random_state = seed, \
+        return tree.DecisionTreeClassifier(random_state=seed, \
                 criterion="entropy")
     if(algoname == 'lr'):
-        return LogisticRegression(penalty='l1', class_weight='auto', random_state=seed)
+        return LogisticRegression(penalty='l1', class_weight='auto', \
+                random_state=seed)
+    if(algoname == 'rfc'):
+        return RFC(criterion='entropy', random_state=seed)
+    if(algoname == 'bac'):
+        return BAC(random_state=seed)
+    if(algoname == 'abc'):
+        return ABC(random_state=seed)
 
     # You only get here if the string was invalid
     print("Unrecognized algorithm name")

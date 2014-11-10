@@ -176,8 +176,9 @@ def clargs():
         description='Run a single machine learning trial')
     parser.add_argument('database', type=argparse.FileType('r'), \
         help='The csv database file to use')
-    parser.add_argument('algorithm', choices=['nb', 'dt', 'dte', 'lr'], \
-        help='The learning argument to use.')
+    parser.add_argument('algorithm', \
+            choices=['nb', 'dt', 'dte', 'lr', 'rfc', 'abc', 'bac'], \
+            help='The learning argument to use.')
     parser.add_argument('-s', '--seed', type=int, required=True, \
         help='integer seed to use (for repeating random trials)')
     parser.add_argument('-n', '--numsamples', type=int, \
