@@ -21,7 +21,7 @@ trial=$2
 resdir=$3
 sumfi=$4
 
-samples=45000 # Keep the number of samples constant
+samples=35000 # Keep the number of samples constant
 algs=('dte' 'rfc' 'abc' 'bac')
 malfracs=('0.001' '0.01' '0.1' '0.25' '0.5' '0.75' '0.9')
 seeds=('313379001')
