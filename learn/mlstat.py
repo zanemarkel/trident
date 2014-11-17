@@ -30,8 +30,8 @@ def print_results_header():
 def printresults(perfmeasure, scores):
     ''' Prints a standard string summarizing several scores. '''
     # Print the results
-    avgstr = '{:.4}'.format(scores.mean()).rjust(9)
-    stdstr = '{:.4}'.format(scores.std()).rjust(9)
+    avgstr = '{:.4f}'.format(scores.mean()).rjust(9)
+    stdstr = '{:.4f}'.format(scores.std()).rjust(9)
     resultstr = '{}{}{} '.format(perfmeasure.rjust(9), avgstr, stdstr)
     for score in scores:
         resultstr += ' {:.3}'.format(score)
