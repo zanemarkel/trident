@@ -14,6 +14,32 @@ import requests
 # This should be removed if this module is ever made public.
 APIKEY = '8350d37b16dbdb71f88a480dd9ec1b053142484de45d95596ca193882a70f7bc'
 
+# Plans for testing a generated malware sample:
+# encode many times
+# gen file of list of md5:filename
+# for file in list: !!! Make this concurrent !!!
+#   get report on hash
+#   sleep(2)
+#   if is_report(report): # somebody has tried this, or its a collision
+#       md5:filename:detect_rate >> report_exists.txt
+#    else:
+#        md5:filename > no_report.txt
+#  for file in no_report: !!! make this concurrent !!!
+#    r = scan(file)
+#    print confirmation of submission
+#  wait an hour
+#  for hash in no_report: !!! make this concurrent !!!
+#    get report on hash
+#    sleep(2)
+#    if is_report(report):
+#       md5:filename:detect_rate >> report_exists.txt
+#  for line in report_exists:
+#      if(detect_rate > PREDETERMINED_THRESHOLD):
+#          md5:filename >> needs_more_encoding.txt
+#      else:
+#          md5:filename >> passed.txt
+# All the files in passed.txt are good for scanning
+
 def report(rsrc_hash):
     ''' Reqests a report for a file with the given hash. 
     This is straight from the VirusTotal private API.'''
@@ -55,6 +81,12 @@ def get_detected(response):
         bools.append(response['scans'][av]['detected'])
 
     return bools
+
+def detect_rate(response):
+    ''' Returns the percent (as a decimal) of antivirus scans that claimed
+    the file in the response is malicious. '''
+    detects = get_detected(response)
+    return float(sum(detects))/len(detects)
 
 def scan(fname):
     ''' Uploads a file for VirusTotal to scan.
