@@ -10,6 +10,8 @@
 ###############################################################
 
 import requests
+from fractions import Fraction
+import re
 
 # This should be removed if this module is ever made public.
 APIKEY = '8350d37b16dbdb71f88a480dd9ec1b053142484de45d95596ca193882a70f7bc'
@@ -39,6 +41,27 @@ APIKEY = '8350d37b16dbdb71f88a480dd9ec1b053142484de45d95596ca193882a70f7bc'
 #      else:
 #          md5:filename >> passed.txt
 # All the files in passed.txt are good for scanning
+# UPDATE: Make object like [ payload, filename, hash, detection rate (fraction), encoding chain ]
+# encoding chain would be like [(shikata-ga-nai, 7), (veil-evasion, 15), ...]
+
+class Payload:
+    '''Class that contains all the metadata for an encoded payload.
+    Initialized though a line in a database.''' 
+
+    def __init__(self, line):
+        '''line should be of the form payload:fname:md5:detect_rate:encoding_chain
+        e.g. 'cve1337:/tmp/cve1337:fe45...bc:0/55:('shikata-ga-nai,7), (veil-evasion, 15), ...'
+        fname should be of the form /absolute/path/.../name'''
+        pieces = re.match(r'(.*):(.*):(.*):(.*)/(.*):(.*)$', line)
+        if pieces:
+            self.payload = pieces.group(1)
+            self.fname = pieces.group(2)
+            self.md5 = pieces.group(3)
+            self.detect_rate = Fraction(pieces.group(4), pieces.group(5))
+            # TODO: check for whole numbers e.g. Fraction(1,1) prints as '1'
+            # NOT DONE
+        else:
+            raise Exception("Invalid line {}".format(line))
 
 def report(rsrc_hash):
     ''' Reqests a report for a file with the given hash. 
@@ -86,7 +109,7 @@ def detect_rate(response):
     ''' Returns the percent (as a decimal) of antivirus scans that claimed
     the file in the response is malicious. '''
     detects = get_detected(response)
-    return float(sum(detects))/len(detects)
+    return Fraction(sum(detects), len(detects))
 
 def scan(fname):
     ''' Uploads a file for VirusTotal to scan.
