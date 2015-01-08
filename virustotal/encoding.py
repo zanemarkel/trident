@@ -9,16 +9,14 @@
 ###############################################################
 
 import json
-from fractions import Fraction
-import re
 
-class Encoding:
+class Encoding():
     ''' Class that contains all the metadata for an encoded payload.
     Ini'd through known metadata or through a JSON dump in a database.
     Format:
     {'payload':payload, 'filename':fname, 'md5':md5,
     'detects':number_of_avs_detecting_payload, 'tests':number_of_avs_tested,
-    'chain':[(encoding, count), (encoding, count), ...]}
+    'chain':[[encoding, count], [encoding, count], ...]}
 
     Note that "detects"/"tests" would give the detection rate.
     '''
@@ -30,6 +28,10 @@ class Encoding:
         self.detects = detects
         self.tests = tests
         self.chain = chain
+
+    def to_str(self):
+        ''' Returns a json-dump string of the object.'''
+        return json.dumps(self.__dict__)
 
     def detect_rate(self):
         ''' Returns "detects"/"tests" (or 'N/A' if tests == 0) '''
@@ -45,22 +47,7 @@ def loading_encoding(dct):
                 dct['detects'], dct['tests'], dct['chain'])
     return dct # this shouldn't happen
 
-class Payload:
-    '''Class that contains all the metadata for an encoded payload.
-    Initialized though a line in a database.''' 
-
-    def __init__(self, line):
-        '''line should be of the form payload:fname:md5:detect_rate:encoding_chain
-        e.g. 'cve1337:/tmp/cve1337:fe45...bc:0/55:('shikata-ga-nai,7), (veil-evasion, 15), ...'
-        fname should be of the form /absolute/path/.../name'''
-        pieces = re.match(r'(.*):(.*):(.*):(.*)/(.*):(.*)$', line)
-        if pieces:
-            self.payload = pieces.group(1)
-            self.fname = pieces.group(2)
-            self.md5 = pieces.group(3)
-            self.detect_rate = Fraction(pieces.group(4), pieces.group(5))
-            # TODO: check for whole numbers e.g. Fraction(1,1) prints as '1'
-            # NOT DONE
-        else:
-            raise Exception("Invalid line {}".format(line))
-
+def load_line(line):
+    ''' wrapper for loading_encoding that alleviates need to call any json
+    function. '''
+    return json.loads(line.strip(), object_hook=loading_encoding)
