@@ -12,7 +12,7 @@
 # -h option
 if [ $1 = "-h" ]
 then
-    echo "usage: ${0} DB TRIAL.PY RESULTS_DIR SUMMARY_FILE GRAPHS_DIR"
+    echo "usage: ${0} DB TRIAL.PY RESULTS_DIR SUMMARY_FILE"
     exit
 fi
 
