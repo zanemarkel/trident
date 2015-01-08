@@ -44,10 +44,10 @@ do
                 echo $name 
                 
                 # Actually run a trial
-                #python $trial -s $seed -n $samples -m $tr $te $db $alg > $resdir$name
+                python $trial -s $seed -n $samples -m $tr $te $db $alg > $resdir$name
 
                 # Add the results to the summary file
-                #python summarize.py -c "$alg,$tr,$te,$seed,$bname" $resdir$name >> $sumfi
+                python summarize.py -c "$alg,$tr,$te,$seed,$bname" $resdir$name >> $sumfi
             done
         done
     done
