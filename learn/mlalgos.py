@@ -18,6 +18,7 @@ from sklearn.ensemble import RandomForestClassifier as RFC
 from sklearn.ensemble import AdaBoostClassifier as ABC
 from sklearn.ensemble import BaggingClassifier as BAC
 from sklearn import tree
+from sklearn import svm
 from sklearn import cross_validation
 import pydot
 from sklearn.externals.six import StringIO
@@ -51,6 +52,11 @@ def get_estimator(algoname, seed=0):
         return BAC(random_state=seed)
     if(algoname == 'abc'):
         return ABC(random_state=seed)
+    # Implementation of a linear SVM. Note: nonlinear will take more time, but
+    # will likely have slightly higher performance.
+    if(algoname == 'svm'):
+        return svm.LinearSVC(random_state=seed)
+        #return svm.SVC(random_state=seed)
 
     # You only get here if the string was invalid
     print("Unrecognized algorithm name")
