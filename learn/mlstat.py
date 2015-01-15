@@ -28,7 +28,7 @@ def print_results_header():
     print('  Measure  Average   StdDev Fold-Scores')
 
 def printresults(perfmeasure, scores):
-    ''' Prints a standard string summarizing several scores. '''
+    ''' Prints a standard string summarizing several scores. Perfmeasure must be as a string.'''
     # Print the results
     avgstr = '{:.4f}'.format(scores.mean()).rjust(9)
     stdstr = '{:.4f}'.format(scores.std()).rjust(9)

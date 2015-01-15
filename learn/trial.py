@@ -20,6 +20,7 @@ import argparse
 from pprint import pprint
 from sklearn import cross_validation
 from sklearn import tree
+from sklearn.metrics import fbeta_score, make_scorer
 #import pydot
 #from sklearn.externals.six import StringIO
 
@@ -63,8 +64,11 @@ def sometrials(options):
     printparams(options)
     mlstat.print_results_header()
 
+    # make the fbeta scoring object
+    scorer = make_scorer(fbeta_score, beta=options.beta)
+
     # Fit and score based on the various performance measures
-    perfmeasures = ['accuracy', 'precision', 'recall', 'f1']
+    perfmeasures = ['accuracy', 'precision', 'recall', scorer]
     for perfmeasure in perfmeasures:
         score_on_splits(perfmeasure, options, features, labels, featnames, splits)
 
@@ -74,6 +78,7 @@ def score_on_splits(perfmeasure, options, features, labels, featnames, splits):
     ''' Actually do the fitting and evaluating.
 
     perfmeasure = scoring mechanic. e.g. 'accuracy', 'precision', 'recall', 'f1'
+        (this can be a scoring object or a string)
     options = the command line arguments
     features = the data records
     labels = the data labels
@@ -89,7 +94,12 @@ def score_on_splits(perfmeasure, options, features, labels, featnames, splits):
                 scoring=perfmeasure, cv=splits)
 
     # Print the results
-    mlstat.printresults(perfmeasure, scores)
+    metric = 'ERROR'
+    if(isinstance(perfmeasure, basestring)):
+        metric = perfmeasure
+    else:
+        metric = 'f-'+str(options.beta)
+    mlstat.printresults(metric, scores)
 
     # Icing on the cake: draw a decision tree graph
     # based on the fold with the best f1 score
@@ -192,7 +202,9 @@ def clargs():
         help='file to export post-sampled/preprocessed database to')
     parser.add_argument('--acc', default=False, action='store_true', \
         help='Run a simple accuracy trial without CV')
-    # The graphfile is taken as a string, because that's how the library takes it
+    parser.add_argument('-b', '--beta', type=float, \
+        help='specify a beta for the fbeta score.')
+    # The graphfile is taken as a string because that's how the library takes it
     parser.add_argument('-g', '--graphfile', \
         help='if decision trees are used, specifies a file to write a graph to')
     args = parser.parse_args()
