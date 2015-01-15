@@ -7,12 +7,12 @@
 # Bagging on a variety of malprev combinations
 # NOTE: There will be no graphs produced with these tests.
 
-# usage: ./ensemble.sh DB TRIAL.PY RESULTS_DIR SUMMARY_FILE 
+# usage: ./ensemble.sh DB TRIAL.PY RESULTS_DIR SUMMARY_FILE EXTRA_TRIAL_ARGS 
 
 # -h option
 if [ $1 = "-h" ]
 then
-    echo "usage: ${0} DB TRIAL.PY RESULTS_DIR SUMMARY_FILE"
+    echo "usage: ${0} DB TRIAL.PY RESULTS_DIR SUMMARY_FILE EXTRA_TRIAL_ARGS"
     exit
 fi
 
@@ -20,6 +20,7 @@ db=$1
 trial=$2
 resdir=$3
 sumfi=$4
+extras=$5
 
 samples=35000 # Keep the number of samples constant
 algs=('dte' 'rfc' 'abc' 'bac')
@@ -35,11 +36,12 @@ do
         do
             for seed in ${seeds[@]}
             do
-                name="res-"$i"-"$tr"-"$te"-"$seed
+                nmextras=${extras// /_}
+                name="res-"$i"-"$tr"-"$te"-"$seed$nmextras
                 echo $name 
                 
                 # Actually run a trial
-                python $trial -s $seed -n $samples -m $tr $te $db $i > $resdir$name
+                python $trial -s $seed -n $samples -m $tr $te $extras $db $i > $resdir$name
 
                 # Add the results to the summary file
                 python summarize.py -c "$i,$tr,$te,$seed" $resdir$name >> $sumfi
