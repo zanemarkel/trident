@@ -202,7 +202,7 @@ def clargs():
         help='file to export post-sampled/preprocessed database to')
     parser.add_argument('--acc', default=False, action='store_true', \
         help='Run a simple accuracy trial without CV')
-    parser.add_argument('-b', '--beta', type=float, \
+    parser.add_argument('-b', '--beta', default=1.0, type=float, \
         help='specify a beta for the fbeta score.')
     # The graphfile is taken as a string because that's how the library takes it
     parser.add_argument('-g', '--graphfile', \
