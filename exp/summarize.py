@@ -8,7 +8,7 @@ trial. """
 # Description:  Parses the output of trial.py and prints 
 #               a line of csv
 #
-#               NOTE: the first line is a dict of the options, consider using
+#               NOTE: the first line is a dict of the options, consider using 
 #               import ast \n ast.literal_eval(line) in order to get it
 #               
 ###############################################################
