@@ -72,11 +72,18 @@ def mine(res):
     return data
 
 def analyze(data):
-    ''' Take a data dict from mine() and return it with tp, fp, etc. '''
-    data['tp'] = data['recall'] * data['mp_te'] * data['numsamples']
-    data['fn'] = data['mp_te'] * data['numsamples'] - data['tp']
-    data['fp'] = data['tp'] / data['precision'] - data['tp']
-    data['tn'] = data['numsamples'] - data['tp'] - data['fp'] - data['fn']
+    ''' Take a data dict from mine() and return it with tp, fp, etc. 
+    Note: these metrics are averages over all trials. Also, they are rounded
+    for clarity.'''
+    data['tp'] = round(data['recall'] * data['mp_te'] * data['numsamples'], 1)
+    data['fn'] = round(data['mp_te'] * data['numsamples'] - data['tp'], 1)
+    if data['precision'] != 0:
+        data['fp'] = round(data['tp'] / data['precision'] - data['tp'], 1)
+        data['tn'] = round(data['numsamples'] - data['tp'] - data['fp'] - \
+                data['fn'], 1)
+    else:
+        data['fp'] = 'unk'
+        data['tn'] = 'unk'
 
     return data
 
@@ -107,24 +114,6 @@ def summarize(args):
                 data['precision'], data['recall'], data['fbeta'], data['beta']\
                 , data['mp_tr'], data['mp_te'], data['algorithm'])
         print summary
-        '''
-        # The first line is a dict string
-        _ = res.readline()
-        # The next line in the header information
-        _ = res.readline()
-
-        # Make a line
-        for line in res.readlines():
-            linemod = line.strip().split()
-            summary += '{}'.format(linemod[1]) + ','
-
-
-        # Append the comments
-        summary += '{}'.format(args.comments)
-
-        # Output the csv line
-        print(summary)
-        '''
-
+        
 if __name__ == '__main__':
     main()
