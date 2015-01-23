@@ -18,13 +18,14 @@ import sys
 
 def getImps(f):
     ''' Return the set of imports in the given file. '''
-    print(f, file=sys.stderr)
     pe = pefile.PE(f, fast_load=True)
 
     myimps = set()
     
     # Get the set of imported symbols
     pe.parse_data_directories()
+    
+    # getattr prevents a crash when a pe doesn't have any imports.
     for entry in getattr(pe, 'DIRECTORY_ENTRY_IMPORT', []):
         for imp in entry.imports:
             myimps.add(imp.name)
