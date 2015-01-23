@@ -109,7 +109,7 @@ def summarize(args):
             header()
 
         # Create the data string
-        summary = '{}, {}, {}, {}, {}, {}, {}, {}, {}. {}, {}'.format(\
+        summary = '{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}'.format(\
                 data['tp'], data['fp'], data['tn'], data['fn'], \
                 data['precision'], data['recall'], data['fbeta'], data['beta']\
                 , data['mp_tr'], data['mp_te'], data['algorithm'])
