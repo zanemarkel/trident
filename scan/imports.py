@@ -32,6 +32,35 @@ def getImps(f):
     
     return myimps
 
+def feature_line(label, name, imps):
+    ''' Returns a csv line perfectly formatted for isMalware, Name, <imps>'''
+    feats = []
+
+    # Add the label
+    if('malicious' == label):
+        feats.append('1')
+    else:
+        feats.append('0')
+
+    # Add the filename
+    feats.append(name)
+
+    # Get the list of imported symbols for the file
+    rawimps = getImps(name)
+
+    # Add binary feature values for each feature in imps
+    for imp in imps:
+        if imp in rawimps:
+            feats.append('1')
+        else:
+            feats.append('0')
+
+    return ', '.join(feats)
+
+def header_line(imps):
+    ''' The header line, which is printed unless --append is chosen. '''
+    print('isMalware, Name, {}'.format(', '.join(imps)))
+
 def main():
     ''' The main function.'''
 
@@ -40,30 +69,43 @@ def main():
             symbols from the files in a list of PE\'s.')
     parser.add_argument('fileList', type=argparse.FileType('r'), \
             default=sys.stdin, help='file containing list of PE files.')
+    parser.add_argument('imports', type=argparse.FileType('r'), \
+            help='file containing list of import symbols to use as features.')
+    parser.add_argument('label', choices=['malicious', 'benign'], \
+            help='whether the given files are benign or malicious.')
+    parser.add_argument('--noheader', action='store_true', default=False, \
+            help='Do not write a header line.')
     args = parser.parse_args()
 
+    # Get the list of features
+    imps = []
+    with args.imports as impsFile:
+        imps = impsFile.readlines()
+        imps = [imp.strip() for imp in imps]
+
+    # Write a header line, if necessary
+    if(not args.noheader):
+        header_line(imps)
+   
     # Open up the list of files
     with args.fileList as files:
-
-        _ = files.readline() # junk the header line
 
         # Maintain a file count for verbosity purposes
         finished = 0
 
-        # The set of all imports
-        tot_imps = set()
-
         # Read all the files
         for line in files.readlines():
             f = line.strip()
-            tot_imps = tot_imps.union(getImps(f))
+
+            # Generate and print the csv line
+            line = feature_line(args.label, f, imps)
+            print(line)
+
+            # For verbosity purposes
             finished += 1
-
-            if (finished % 10000) == 0:
-                print("{}".format(finished), file=sys.stderr)
-
-        for imp in tot_imps:
-            print(imp)
+            if (finished % 1000) == 0:
+                print("Finished {} {}".format(finished, args.label), \
+                        file=sys.stderr)
 
 if __name__ == '__main__':
     main()
