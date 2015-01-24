@@ -23,12 +23,15 @@ def getImps(f):
     myimps = set()
     
     # Get the set of imported symbols
-    pe.parse_data_directories()
-    
-    # getattr prevents a crash when a pe doesn't have any imports.
-    for entry in getattr(pe, 'DIRECTORY_ENTRY_IMPORT', []):
-        for imp in entry.imports:
-            myimps.add(imp.name)
+    try:
+        pe.parse_data_directories()
+        
+        # getattr prevents a crash when a pe doesn't have any imports.
+        for entry in getattr(pe, 'DIRECTORY_ENTRY_IMPORT', []):
+            for imp in entry.imports:
+                myimps.add(imp.name)
+    except AttributeError:
+        print('[-] {}: AttributeError'.format(f), file=sys.stderr)
     
     return myimps
 
