@@ -28,7 +28,7 @@ extras=$5
 
 samples=35000
 alg='rfc'
-malfracs=('0.001' '0.01' '0.1' '0.25' '0.5' '0.75' '0.9')
+malfracs=('0.001' '0.01' '0.1' '0.25' '0.5')
 seeds=('313379001')
 
 echo "accuracy,precision,recall,f1,algorithm,malfrac_tr,malfrac_te,seed,feature" > $sumfi

@@ -15,6 +15,7 @@ trial. This summary will also calculate the average abs tp, fp, tn, and fn's."""
 
 import argparse
 import re
+import os.path as op
 
 def main():
     ''' Parse the results of a single machine learning trial
@@ -59,6 +60,12 @@ def mine(res):
     if(match):
         data['beta'] = float(match.group(1))
 
+    # Get the db
+    matchln = r"open file '(.+?)',"
+    match = re.search(matchln, params)
+    rawdb = match.group(1)
+    data['db'] = op.basename(rawdb).split('.')[0]
+
     # The next line in the header information
     _ = res.readline()
 
@@ -67,6 +74,8 @@ def mine(res):
         linemod = line.strip().split()
         if(linemod[0][0] == 'f'):
             linemod[0] = 'fbeta'
+            data['stddev'] = linemod[2]
+            data['splits'] = ', '.join(linemod[3:])
         data[linemod[0]] = float(linemod[1])
 
     return data
@@ -89,12 +98,13 @@ def analyze(data):
 
 def header():
     ''' Print the header line. '''
-    print 'tp, fp, tn, fn, p, r, fbeta, beta, mp_tr, mp_te, alg'
-
+    print 'db, mp_tr, mp_te, alg, tp, fp, tn, fn, p, r, beta, favg, stddev, '\
+            + 'splits'
 
 def summarize(args):
     ''' Gathers data and prints it in a csv format.
-    Order = tp, fp, tn, fn, p, r, fbeta, beta, mp_tr, mp_te, alg'''
+    Order = db, mp_tr, mp_te, alg, tp, fp, tn, fn, p, r, beta, favg, stddev, 
+    splits'''
 
     # Parse the file for averages
     summary = ''
@@ -109,11 +119,12 @@ def summarize(args):
             header()
 
         # Create the data string
-        summary = '{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}'.format(\
-                data['tp'], data['fp'], data['tn'], data['fn'], \
-                data['precision'], data['recall'], data['fbeta'], data['beta']\
-                , data['mp_tr'], data['mp_te'], data['algorithm'])
+        summary = '{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}'.\
+                format(data['db'], data['mp_tr'], data['mp_te'], \
+                data['algorithm'], data['tp'], data['fp'], data['tn'], \
+                data['fn'], data['precision'], data['recall'], \
+                data['beta'], data['fbeta'], data['stddev'], data['splits'])
         print summary
-        
+
 if __name__ == '__main__':
     main()
